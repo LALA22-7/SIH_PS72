@@ -7,6 +7,17 @@ This document outlines the phased engineering schedule for the StormSight nowcas
 ## Phase 1: Ingestion & Stream Processing Engine
 **Objective**: Establish a robust, high-throughput data pipeline to ingest multi-modal sensor data, parse native binary formats, and stage them via Kafka and MinIO with a $< 10\text{s}$ ingestion latency budget.
 
+**Workflow**:
+```mermaid
+flowchart TD
+    DWR[(IMD DWR)] --> RI[Radar Ingestor]
+    INSAT[(INSAT-3D/3DR)] --> SI[Satellite Ingestor]
+    ILDN[(Lightning Data)] --> LI[Lightning Ingestor]
+    NWP[(NWP Models)] --> NI[NWP Ingestor]
+    RI & SI & LI & NI -->|Upload Binaries| MinIO[(MinIO Bucket)]
+    RI & SI & LI & NI -->|Publish Metadata| Kafka{Kafka Broker}
+```
+
 *   [ ] **1.1 MinIO & Kafka Infrastructure**: Deploy and configure Kafka topics (`ingest.radar.raw`, `ingest.satellite.insat`, `ingest.lightning.strikes`) and MinIO buckets (`radar-raw`, `nowcast-predictions`) with appropriate retention policies.
 *   [ ] **1.2 Radar Ingestion Daemon**: Implement `radar_ingestor.py` using `arm-pyart`.
     *   Connect to IMD DWR feed.
@@ -32,6 +43,16 @@ This document outlines the phased engineering schedule for the StormSight nowcas
 ## Phase 2: Multi-Modal Spatio-Temporal ML Engine
 **Objective**: Construct the Tensor Fusion pipeline and the PyTorch UNet-ConvLSTM inference module. Transform heterogeneous data into a unified coordinate system and execute forward passes under stringent time constraints.
 
+**Workflow**:
+```mermaid
+flowchart TD
+    K{Kafka} -->|Trigger| TF[Tensor Fusion]
+    M[(MinIO)] -->|Fetch Blobs| TF
+    TF -->|Reproject & Align| T[7-Channel Tensor]
+    T -->|FP16 Forward Pass| UNET[UNet-ConvLSTM]
+    UNET --> P[Prediction Tensors]
+```
+
 *   [ ] **2.1 Spatial Normalization & Tensor Fusion (`fusion.py`)**:
     *   Implement strict reprojection to the target Cartesian CRS (e.g., EPSG:32643 - UTM Zone 43N) using `rasterio`/`gdal`.
     *   Apply 2D Gaussian KDE to lightning point geometries to create dense probability heatmaps.
@@ -56,6 +77,17 @@ This document outlines the phased engineering schedule for the StormSight nowcas
 ## Phase 3: Real-Time Inference & Backend Serving
 **Objective**: Bridge the ML Engine to the FastAPI backend, implementing stateful inference background loops, database persistence, and WebSocket broadcast channels.
 
+**Workflow**:
+```mermaid
+flowchart TD
+    P[Prediction Tensors] --> PP[Output Tiling]
+    PP -->|Save Tiles| M[(MinIO)]
+    PP -->|Calculate Polygons| Alert[Alert Generator]
+    Alert -->|Save Metadata| PG[(PostGIS)]
+    M & PG --> API[FastAPI Core]
+    API -->|Push Events| WS((WebSocket Layer))
+```
+
 *   [ ] **3.1 Background Inference Worker**:
     *   Implement the Kafka consumer for the ingestion topics to trigger inference automatically.
     *   Manage ConvLSTM hidden state persistence (in VRAM or Redis) to prevent cold-start latencies.
@@ -79,6 +111,15 @@ This document outlines the phased engineering schedule for the StormSight nowcas
 ## Phase 4: High-Performance Geospatial Frontend
 **Objective**: Render the nowcasting data in the browser fluidly, overlaying radar, satellite, and alerts on an interactive map.
 
+**Workflow**:
+```mermaid
+flowchart LR
+    WS((WebSocket Events)) --> Store[React State / Zustand]
+    Store --> UI[Timeline & Overlays]
+    UI --> Map[Leaflet WebGL]
+    M[(MinIO URLs)] --> Map
+```
+
 *   [ ] **4.1 React Component Architecture**:
     *   Integrate Leaflet.js within the React ecosystem (`NowcastMap`).
     *   Implement global state management (Zustand or Redux) for managing the timeline state.
@@ -99,6 +140,15 @@ This document outlines the phased engineering schedule for the StormSight nowcas
 
 ## Phase 5: Field Validation, Benchmarking & Packaging
 **Objective**: Subject the integrated system to extreme stress tests utilizing historical severe weather events and package for production deployment.
+
+**Workflow**:
+```mermaid
+flowchart TD
+    Hist[(Historical Data)] --> Play[Replay Pipeline]
+    Play --> Metrics[Calculate CSI/POD/FAR]
+    Play --> Chaos[Load Testing & Chaos Env]
+    Metrics & Chaos --> Deploy[Docker/Helm Packaging]
+```
 
 *   [ ] **5.1 Retrospective Extreme Event Benchmarking**:
     *   Replay data from 3 major historical convective events (e.g., Kalbaishakhi/Nor'westers) through the pipeline.

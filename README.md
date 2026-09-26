@@ -40,7 +40,7 @@ graph TD
     subgraph Intelligence Engine [Tensor Fusion & PyTorch]
         K -->|Consume| TF[Tensor Fusion Module]
         M -->|Download Blob| TF
-        TF -->|Common CRS Tensor [B, T, C, H, W]| ML((UNet-ConvLSTM Model))
+        TF -->|"Common CRS Tensor [B, T, C, H, W]"| ML((UNet-ConvLSTM Model))
         ML -->|Prediction Tensor| PP[Post-Processing & Tiling]
     end
 
