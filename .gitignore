@@ -1,0 +1,42 @@
+﻿# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Environment
+.env
+*.env.local
+
+# Data (large files)
+data/raw/
+data/processed/
+*.nc
+*.grib2
+*.h5
+*.hdf5
+
+# ML checkpoints
+ml/checkpoints/*.pt
+ml/checkpoints/*.pth
+ml/checkpoints/*.onnx
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Node
+node_modules/

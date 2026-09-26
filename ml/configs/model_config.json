@@ -1,0 +1,63 @@
+﻿{
+  "_comment": "Model configuration for StormSight PS072 thunderstorm nowcaster.",
+
+  "model": {
+    "name": "ps72-nowcast",
+    "version": "0.1.0",
+    "architecture": "UNet-ConvLSTM",
+    "checkpoint": "ml/checkpoints/model.pt"
+  },
+
+  "input": {
+    "channels": [
+      "radar_reflectivity",
+      "radar_velocity",
+      "satellite_ir",
+      "satellite_wv",
+      "lightning_density",
+      "cape",
+      "cin",
+      "wind_shear_06"
+    ],
+    "num_channels": 8,
+    "shape": "[T, C, H, W]",
+    "grid_resolution_deg": 0.05,
+    "temporal_steps": 6,
+    "temporal_interval_minutes": 10
+  },
+
+  "training": {
+    "num_classes": 3,
+    "class_labels": ["no_storm", "thunderstorm", "severe_thunderstorm"],
+    "batch_size": 4,
+    "learning_rate": 0.0005,
+    "optimizer": "AdamW",
+    "lr_scheduler": "CosineAnnealingLR",
+    "loss": "WeightedBCEWithLogitsLoss",
+    "epochs": 100,
+    "val_fraction": 0.15,
+    "split_seed": 42
+  },
+
+  "nowcast": {
+    "horizon_minutes": 120,
+    "output_interval_minutes": 15,
+    "output_steps": 8,
+    "probability_threshold": 0.60
+  },
+
+  "evaluation_metrics": [
+    "CSI",
+    "POD",
+    "FAR",
+    "HSS",
+    "RMSE_position_km",
+    "lead_time_skill_decay"
+  ],
+
+  "status": {
+    "model_training": "pending",
+    "data_pipeline": "scaffold_ready",
+    "freeze_date": null
+  }
+}

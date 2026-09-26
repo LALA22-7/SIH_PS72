@@ -1,0 +1,71 @@
+﻿# StormSight -- DEV Docker Compose
+# Usage: docker compose up
+version: "3.9"
+
+services:
+  db:
+    image: postgis/postgis:15-3.3
+    container_name: stormsight_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-stormsight}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-stormsight_secret}
+      POSTGRES_DB: ${POSTGRES_DB:-stormsight}
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U stormsight -d stormsight"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: stormsight_redis
+    restart: unless-stopped
+    ports:
+      - "6380:6379"
+
+  redpanda:
+    image: docker.redpanda.com/redpandadata/redpanda:v23.3.5
+    container_name: stormsight_redpanda
+    command:
+      - redpanda
+      - start
+      - --smp=1
+      - --memory=512M
+      - --overprovisioned
+      - --kafka-addr=PLAINTEXT://0.0.0.0:9092
+    ports:
+      - "9093:9092"
+
+  api:
+    build:
+      context: .
+    container_name: stormsight_api
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql+asyncpg://stormsight:stormsight_secret@db:5432/stormsight
+      DATABASE_SYNC_URL: postgresql+psycopg2://stormsight:stormsight_secret@db:5432/stormsight
+      REDIS_URL: redis://redis:6379/0
+      KAFKA_BOOTSTRAP_SERVERS: redpanda:9092
+      PYTHONPATH: /ml:/app
+      DEBUG: "true"
+    ports:
+      - "8001:8000"
+    volumes:
+      - .:/app
+      - ../ml:/ml
+      - ../data:/data
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+volumes:
+  postgres_data:

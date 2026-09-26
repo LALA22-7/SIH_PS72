@@ -1,0 +1,15 @@
+﻿{
+  "_comment": "Evaluation metrics template for PS 072 nowcasting model.",
+  "metrics": {
+    "CSI": null,
+    "POD": null,
+    "FAR": null,
+    "HSS": null,
+    "RMSE_position_km": null,
+    "lead_time_skill_30min": null,
+    "lead_time_skill_60min": null,
+    "lead_time_skill_120min": null
+  },
+  "evaluated_on": null,
+  "num_test_samples": null
+}
