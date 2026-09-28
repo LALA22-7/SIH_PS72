@@ -10,9 +10,36 @@
 
 /* Custom Leaflet Dark Mode Tweaks */
 .leaflet-container {
-  @apply bg-[#050505] font-sans;
+  @apply bg-[#010B13] font-sans;
 }
 
 .map-tiles {
   filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
+}
+
+/* ── Risk-Level Map Marker Pulse Rings ── */
+@keyframes riskPulse {
+  0% { transform: scale(1); opacity: 0.6; }
+  70% { transform: scale(2.2); opacity: 0; }
+  100% { transform: scale(2.2); opacity: 0; }
+}
+
+.risk-marker-pulse {
+  animation: riskPulse 2s ease-out infinite;
+  border-radius: 50%;
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* Alert panel scrollbar */
+.alert-panel::-webkit-scrollbar {
+  width: 4px;
+}
+.alert-panel::-webkit-scrollbar-track {
+  background: #06111A;
+}
+.alert-panel::-webkit-scrollbar-thumb {
+  background: #142637;
+  border-radius: 4px;
 }

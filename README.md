@@ -1,3 +1,7 @@
+**🔗 Frontend URL:** [StormSight Dashboard (Local Dev)](http://localhost:5173/dashboard) | **Repository:** [github.com/varshneydevansh21/SIH_PS72](https://github.com/varshneydevansh21/SIH_PS72)
+
+---
+
 # 🌩️ StormSight - Mission-Critical Meteorological Nowcasting
 
 **Smart India Hackathon 2026 | Problem Statement 072**
