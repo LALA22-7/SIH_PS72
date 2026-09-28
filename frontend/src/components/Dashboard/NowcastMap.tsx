@@ -251,9 +251,9 @@ export function NowcastMap() {
               <div key={level} className="flex items-center gap-2 text-xs">
                 <div
                   className="w-3 h-3 rounded-full border"
-                  style={{ backgroundColor: cfg.fillColor, borderColor: cfg.color, opacity: count > 0 ? 1 : 0.3 }}
+                  style={{ backgroundColor: cfg.fillColor, borderColor: cfg.color, opacity: 1 }}
                 />
-                <span className={count > 0 ? 'text-nowcast-text font-medium' : 'text-nowcast-textMuted'}>
+                <span className="text-nowcast-text font-medium">
                   {cfg.label}
                 </span>
                 {count > 0 && (
