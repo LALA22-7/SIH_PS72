@@ -286,6 +286,8 @@ export function NowcastMap() {
       {/* ── Risk Legend ── */}
       <div className="absolute bottom-4 right-4 z-[500] bg-nowcast-sidebar/90 backdrop-blur-md border border-nowcast-border rounded-lg p-3 shadow-lg">
         <div className="text-[10px] font-semibold text-nowcast-textMuted uppercase tracking-wider mb-2">
+          Risk Levels
+        </div>
         <div className="flex flex-col gap-1.5">
           {(['low', 'medium', 'high', 'critical'] as RiskLevel[]).map((level) => {
             const cfg = RISK_LEVEL_CONFIG[level];
