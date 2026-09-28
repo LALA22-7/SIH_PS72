@@ -7,7 +7,7 @@ import {
   type RiskLevel,
   RISK_LEVEL_CONFIG,
 } from '../../types/nowcast';
-import { AlertTriangle, Shield, Zap, CloudLightning, X } from 'lucide-react';
+import { AlertTriangle, Shield, Zap, CloudLightning, X, Plus, Minus } from 'lucide-react';
 
 // India center
 const MAP_CENTER = [20.5937, 78.9629] as [number, number];
@@ -48,6 +48,20 @@ function MapUpdater({ cells, alerts }: { cells: any[]; alerts: WeatherAlert[] })
     }
   }, [mapCenter, mapZoom, map, setMapCenter]);
   return null;
+}
+
+function CustomZoomControl() {
+  const map = useMap();
+  return (
+    <div className="absolute top-4 left-4 z-[400] flex flex-col bg-nowcast-sidebar/90 backdrop-blur-md border border-nowcast-card rounded-md shadow-lg overflow-hidden">
+      <button onClick={(e) => { e.preventDefault(); map.zoomIn(); }} className="p-2 hover:bg-nowcast-card transition-colors border-b border-nowcast-card">
+        <Plus className="w-4 h-4 text-nowcast-text" />
+      </button>
+      <button onClick={(e) => { e.preventDefault(); map.zoomOut(); }} className="p-2 hover:bg-nowcast-card transition-colors">
+        <Minus className="w-4 h-4 text-nowcast-text" />
+      </button>
+    </div>
+  );
 }
 
 
@@ -221,6 +235,7 @@ export function NowcastMap() {
         })}
 
         <MapUpdater cells={cells} alerts={visibleAlerts} />
+        <CustomZoomControl />
       </MapContainer>
 
       {/* ── Risk Legend ── */}

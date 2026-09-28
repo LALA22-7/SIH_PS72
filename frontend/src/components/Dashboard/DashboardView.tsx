@@ -127,17 +127,7 @@ export function DashboardView() {
               Valid Time: 14:45 UTC (+15 min)
             </div>
 
-            {/* Map controls */}
-            <div className="absolute top-4 left-4 z-[400] flex flex-col gap-2">
-               <div className="flex flex-col bg-nowcast-sidebar/90 backdrop-blur-md border border-nowcast-card rounded-md shadow-lg overflow-hidden">
-                 <button className="p-2 hover:bg-nowcast-card transition-colors border-b border-nowcast-card"><Plus className="w-4 h-4 text-nowcast-text" /></button>
-                 <button className="p-2 hover:bg-nowcast-card transition-colors"><Minus className="w-4 h-4 text-nowcast-text" /></button>
-               </div>
-               <button className="p-2 bg-nowcast-sidebar/90 backdrop-blur-md border border-nowcast-card rounded-md hover:bg-nowcast-card transition-colors shadow-lg">
-                 <Layers className="w-4 h-4 text-nowcast-text" />
-               </button>
-            </div>
-
+            {/* Map controls moved to NowcastMap */}
             {/* Legend */}
             <div className="absolute bottom-4 left-4 z-[400] bg-nowcast-sidebar/90 backdrop-blur-md border border-nowcast-card rounded-lg p-3 shadow-lg w-64">
               <div className="text-xs font-medium text-nowcast-text mb-2">Thunderstorm Probability (%)</div>
