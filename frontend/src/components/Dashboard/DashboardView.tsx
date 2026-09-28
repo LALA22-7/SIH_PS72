@@ -1,9 +1,26 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Cloud, Zap, AlertTriangle, MapPin, Settings2, Plus, Minus, Layers } from 'lucide-react';
 import { NowcastMap } from './NowcastMap';
+import { useNowcastStore } from '../../store/useNowcastStore';
+import { RISK_LEVEL_CONFIG, type RiskLevel } from '../../types/nowcast';
+
+function formatRelativeTime(iso: string): string {
+  const diff = new Date(iso).getTime() - Date.now();
+  if (diff <= 0) return 'Expired';
+  const minutes = Math.floor(diff / 60_000);
+  if (minutes < 60) return `${minutes}m remaining`;
+  const hours = Math.floor(minutes / 60);
+  return `${hours}h ${minutes % 60}m remaining`;
+}
 
 export function DashboardView() {
-  return (
+  const { alerts } = useNowcastStore();
+  
+  const sortedAlerts = useMemo(() => {
+    const order: Record<RiskLevel, number> = { critical: 0, high: 1, medium: 2, low: 3 };
+    return [...alerts].sort((a, b) => order[a.riskLevel] - order[b.riskLevel]);
+  }, [alerts]);
+
     <div className="flex flex-col h-full gap-4 p-4 overflow-y-auto">
       {/* Top Stats Cards */}
       <div className="grid grid-cols-4 gap-4 shrink-0">
@@ -117,73 +134,62 @@ export function DashboardView() {
           </div>
         </div>
 
-        {/* Right Details Panel */}
-        <div className="w-80 bg-nowcast-sidebar border border-nowcast-card rounded-xl p-5 flex flex-col gap-6 shrink-0 overflow-y-auto">
-          <div>
-             <div className="flex items-center justify-between mb-4">
-                <h3 className="text-sm font-semibold text-nowcast-text">Location Details</h3>
-                <Settings2 className="w-4 h-4 text-nowcast-textMuted cursor-pointer hover:text-nowcast-text" />
-             </div>
-             <div className="flex items-center gap-2 mb-4">
-               <MapPin className="w-5 h-5 text-nowcast-accent" />
-               <span className="text-lg font-medium">Lucknow, UP</span>
-             </div>
-             <div className="flex rounded-md bg-nowcast-card p-1">
-               <button className="flex-1 py-1 text-xs font-medium bg-nowcast-sidebar rounded shadow text-nowcast-text">Nowcast</button>
-               <button className="flex-1 py-1 text-xs font-medium text-nowcast-textMuted hover:text-nowcast-text">Observations</button>
-             </div>
+        {/* Active Warnings Panel */}
+        <div className="w-80 bg-nowcast-sidebar border border-nowcast-card rounded-xl p-5 flex flex-col gap-4 shrink-0 overflow-y-auto">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-sm font-semibold text-nowcast-text flex items-center gap-2">
+              <AlertTriangle className="w-4 h-4 text-nowcast-warning" />
+              Active Warnings
+            </h3>
+            <span className="bg-nowcast-card text-xs font-medium px-2 py-0.5 rounded-full border border-nowcast-border">
+              {alerts.length} Total
+            </span>
           </div>
 
-          <div>
-             <h4 className="text-xs text-nowcast-textMuted font-medium mb-3">Thunderstorm Probability (Next 2 Hours)</h4>
-             {/* Mock Chart */}
-             <div className="h-32 w-full relative">
-               <svg viewBox="0 0 100 100" className="w-full h-full overflow-visible" preserveAspectRatio="none">
-                 <path d="M0,80 Q20,60 40,20 T80,30 T100,50 L100,100 L0,100 Z" fill="url(#grad)" opacity="0.2" />
-                 <path d="M0,80 Q20,60 40,20 T80,30 T100,50" fill="none" stroke="#f59e0b" strokeWidth="2" strokeLinecap="round" />
-                 <defs>
-                   <linearGradient id="grad" x1="0" y1="0" x2="0" y2="1">
-                     <stop offset="0%" stopColor="#f59e0b" stopOpacity="1" />
-                     <stop offset="100%" stopColor="#f59e0b" stopOpacity="0" />
-                   </linearGradient>
-                 </defs>
-                 <circle cx="0" cy="80" r="3" fill="#f59e0b" className="animate-pulse" />
-                 <circle cx="20" cy="50" r="2" fill="#1e293b" stroke="#f59e0b" strokeWidth="1" />
-                 <circle cx="40" cy="20" r="2" fill="#1e293b" stroke="#f59e0b" strokeWidth="1" />
-                 <circle cx="60" cy="25" r="2" fill="#1e293b" stroke="#f59e0b" strokeWidth="1" />
-                 <circle cx="80" cy="30" r="2" fill="#1e293b" stroke="#f59e0b" strokeWidth="1" />
-                 <circle cx="100" cy="50" r="2" fill="#1e293b" stroke="#f59e0b" strokeWidth="1" />
-               </svg>
-               <div className="absolute inset-0 flex flex-col justify-between text-[8px] text-nowcast-textMuted opacity-50 py-1 pointer-events-none">
-                 <span>100</span><span>75</span><span>50</span><span>25</span><span>0</span>
-               </div>
-               <div className="absolute -bottom-4 left-0 right-0 flex justify-between text-[8px] text-nowcast-textMuted pointer-events-none">
-                 <span>Now</span><span>+15m</span><span>+30m</span><span>+60m</span><span>+90m</span><span>+120m</span>
-               </div>
-             </div>
-          </div>
-
-          <div className="mt-4 flex flex-col gap-4">
-             <div className="flex items-center justify-between pb-3 border-b border-nowcast-card">
-               <span className="text-sm text-nowcast-textMuted">Current Status</span>
-               <span className="text-xs font-semibold px-2 py-1 rounded bg-nowcast-warning/10 text-nowcast-warning border border-nowcast-warning/20">MODERATE RISK</span>
-             </div>
-             <div className="flex items-center justify-between">
-               <span className="text-sm text-nowcast-textMuted">Probability (Next 30 min)</span>
-               <span className="text-sm font-bold text-nowcast-warning">68%</span>
-             </div>
-             <div className="flex items-center justify-between">
-               <span className="text-sm text-nowcast-textMuted">Lightning Probability</span>
-               <span className="text-sm font-bold text-nowcast-warning">52%</span>
-             </div>
-             <div className="flex items-center justify-between">
-               <span className="text-sm text-nowcast-textMuted">Expected Onset</span>
-               <span className="text-sm font-bold text-nowcast-danger">Within 30-60 min</span>
-             </div>
-             <div className="flex items-center justify-between pt-3 border-t border-nowcast-card">
-               <span className="text-sm text-nowcast-textMuted">Suggested Action</span>
-               <span className="text-sm font-medium text-nowcast-text">Monitor & Be Prepared</span>
-             </div>
+          <div className="flex flex-col gap-3">
+            {sortedAlerts.length === 0 ? (
+              <div className="text-sm text-nowcast-textMuted text-center py-8">
+                No active warnings in this region.
+              </div>
+            ) : (
+              sortedAlerts.map((alert) => {
+                const cfg = RISK_LEVEL_CONFIG[alert.riskLevel];
+                return (
+                  <div
+                    key={alert.id}
+                    className={`
+                      flex flex-col gap-1.5 p-3 rounded-lg border
+                      shadow-sm ${cfg.bgClass} ${cfg.borderClass}
+                    `}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className={`text-xs font-bold uppercase tracking-wider ${cfg.textClass}`}>
+                          {cfg.label} Risk
+                        </span>
+                      </div>
+                      <span className="text-[10px] text-nowcast-textMuted font-medium">
+                        {formatRelativeTime(alert.validUntil)}
+                      </span>
+                    </div>
+                    
+                    <p className="text-sm font-bold text-nowcast-text leading-tight mt-1">
+                      {alert.title}
+                    </p>
+                    <p className="text-xs text-nowcast-textMuted line-clamp-2 leading-relaxed">
+                      {alert.description}
+                    </p>
+                    
+                    <div className="flex items-center justify-between mt-2 pt-2 border-t border-nowcast-card/50">
+                      <span className="text-xs text-nowcast-textMuted">Thunderstorm Probability</span>
+                      <span className={`text-xs font-bold ${cfg.textClass}`}>
+                        {(alert.probability * 100).toFixed(0)}%
+                      </span>
+                    </div>
+                  </div>
+                );
+              })
+            )}
           </div>
         </div>
       </div>

@@ -110,110 +110,13 @@ function MapUpdater({ cells, alerts }: { cells: any[]; alerts: WeatherAlert[] })
   return null;
 }
 
-// ────────────────────────────────────────────────────────────────
-//  AlertPanel – collapsible overlay inside the map
-// ────────────────────────────────────────────────────────────────
-function AlertPanel({
-  alerts,
-  onFocusAlert,
-}: {
-  alerts: WeatherAlert[];
-  onFocusAlert: (a: WeatherAlert) => void;
-}) {
-  const [collapsed, setCollapsed] = useState(false);
-
-  const sortedAlerts = useMemo(() => {
-    const order: Record<RiskLevel, number> = { critical: 0, high: 1, medium: 2, low: 3 };
-    return [...alerts].sort((a, b) => order[a.riskLevel] - order[b.riskLevel]);
-  }, [alerts]);
-
-  const criticalCount = alerts.filter((a) => a.riskLevel === 'critical').length;
-  const highCount = alerts.filter((a) => a.riskLevel === 'high').length;
-
-  if (alerts.length === 0) return null;
-
-  return (
-    <div className="absolute top-4 right-4 z-[500] flex flex-col gap-2 w-80">
-      {/* Header Pill */}
-      <button
-        onClick={() => setCollapsed(!collapsed)}
-        className={`
-          flex items-center gap-2 px-3 py-2 rounded-lg backdrop-blur-lg border shadow-lg
-          transition-all duration-300 cursor-pointer
-          ${criticalCount > 0
-            ? 'bg-nowcast-riskCritical/15 border-nowcast-riskCritical/40 text-nowcast-riskCritical'
-            : highCount > 0
-              ? 'bg-nowcast-riskHigh/15 border-nowcast-riskHigh/40 text-nowcast-riskHigh'
-              : 'bg-nowcast-sidebar/90 border-nowcast-border text-nowcast-warning'
-          }
-        `}
-      >
-        <AlertTriangle className={`w-4 h-4 ${criticalCount > 0 ? 'animate-pulse-risk' : ''}`} />
-        <span className="text-xs font-bold uppercase tracking-wider">
-          {alerts.length} Active Warning{alerts.length !== 1 ? 's' : ''}
-        </span>
-        <span className="ml-auto text-[10px] opacity-70">
-          {collapsed ? '▼ Show' : '▲ Hide'}
-        </span>
-      </button>
-
-      {/* Alert Cards */}
-      {!collapsed && (
-        <div className="flex flex-col gap-2 max-h-[400px] overflow-y-auto alert-panel pr-1">
-          {sortedAlerts.map((alert) => {
-            const cfg = RISK_LEVEL_CONFIG[alert.riskLevel];
-            return (
-              <button
-                key={alert.id}
-                onClick={() => onFocusAlert(alert)}
-                className={`
-                  flex flex-col gap-1.5 p-3 rounded-lg backdrop-blur-lg border
-                  shadow-lg transition-all duration-200 text-left
-                  hover:scale-[1.02] hover:shadow-xl cursor-pointer
-                  ${cfg.bgClass} ${cfg.borderClass}
-                  bg-nowcast-sidebar/80
-                `}
-              >
-                <div className="flex items-center gap-2">
-                  <div className={`flex items-center justify-center w-6 h-6 rounded-md ${cfg.bgClass} ${cfg.textClass}`}>
-                    <span className="text-sm">{cfg.icon}</span>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className={`text-xs font-bold uppercase tracking-wider ${cfg.textClass}`}>
-                        {cfg.label} Risk
-                      </span>
-                      <span className="text-[10px] text-nowcast-textMuted">
-                        {formatRelativeTime(alert.validUntil)}
-                      </span>
-                    </div>
-                    <p className="text-xs font-medium text-nowcast-text truncate">
-                      {alert.title}
-                    </p>
-                  </div>
-                  <div className={`text-xs font-bold ${cfg.textClass}`}>
-                    {(alert.probability * 100).toFixed(0)}%
-                  </div>
-                </div>
-                <p className="text-[11px] text-nowcast-textMuted line-clamp-2">
-                  {alert.description}
-                </p>
-              </button>
-            );
-          })}
-        </div>
-      )}
-    </div>
-  );
-}
 
 // ────────────────────────────────────────────────────────────────
 //  NowcastMap – primary export
 // ────────────────────────────────────────────────────────────────
 export function NowcastMap() {
-  const { cells, setNowcastData } = useNowcastStore();
+  const { cells, setNowcastData, alerts, setAlerts } = useNowcastStore();
   const [loading, setLoading] = useState(true);
-  const [alerts, setAlerts] = useState<WeatherAlert[]>(DEMO_ALERTS);
   const [dismissedAlerts, setDismissedAlerts] = useState<Set<string>>(new Set());
 
   useEffect(() => {
@@ -246,6 +149,7 @@ export function NowcastMap() {
         }
       } catch {
         // Fallback to demo alerts
+        setAlerts(DEMO_ALERTS);
       }
 
       setLoading(false);
@@ -379,14 +283,9 @@ export function NowcastMap() {
         <MapUpdater cells={cells} alerts={visibleAlerts} />
       </MapContainer>
 
-      {/* ── Alert Overlay Panel ── */}
-      <AlertPanel alerts={visibleAlerts} onFocusAlert={handleFocusAlert} />
-
       {/* ── Risk Legend ── */}
       <div className="absolute bottom-4 right-4 z-[500] bg-nowcast-sidebar/90 backdrop-blur-md border border-nowcast-border rounded-lg p-3 shadow-lg">
         <div className="text-[10px] font-semibold text-nowcast-textMuted uppercase tracking-wider mb-2">
-          Risk Levels
-        </div>
         <div className="flex flex-col gap-1.5">
           {(['low', 'medium', 'high', 'critical'] as RiskLevel[]).map((level) => {
             const cfg = RISK_LEVEL_CONFIG[level];

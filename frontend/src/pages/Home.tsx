@@ -6,17 +6,17 @@ export function Home() {
   return (
     <div className="min-h-screen bg-nowcast-bg text-nowcast-text overflow-y-auto">
       {/* Navbar */}
-      <nav className="border-b border-nowcast-card bg-nowcast-bg/80 backdrop-blur-md sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-10 h-10 rounded-lg flex items-center justify-center">
-              <img src="/logo.png" alt="StormSight" className="w-8 h-8 object-contain" />
+      <nav className="border-b border-nowcast-card/50 bg-[#010B13]/80 backdrop-blur-md sticky top-0 z-50 shadow-[0_8px_32px_rgba(0,0,0,0.4),inset_0_1px_1px_rgba(255,255,255,0.1),inset_0_-1px_1px_rgba(0,0,0,0.2)]">
+        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-nowcast-card shadow-[inset_2px_2px_4px_rgba(255,255,255,0.05),inset_-2px_-2px_4px_rgba(0,0,0,0.5)]">
+              <img src="/logo.png" alt="StormSight" className="w-9 h-9 object-contain" />
             </div>
-            <span className="font-bold text-xl tracking-tight">StormSight</span>
+            <span className="font-bold text-2xl tracking-tight">StormSight</span>
           </div>
           <div className="flex gap-6 items-center text-sm font-medium">
             <Link to="/architecture" className="text-nowcast-textMuted hover:text-nowcast-accent transition-colors">Architecture</Link>
-            <a href="https://github.com" target="_blank" rel="noreferrer" className="text-nowcast-textMuted hover:text-nowcast-accent transition-colors">GitHub</a>
+            <a href="https://github.com/varshneydevansh21/SIH_PS72" target="_blank" rel="noreferrer" className="text-nowcast-textMuted hover:text-nowcast-accent transition-colors">GitHub</a>
             <Link to="/dashboard" className="px-4 py-2 rounded-md bg-nowcast-accent text-nowcast-bg hover:bg-nowcast-accentHover transition-colors flex items-center gap-2">
               Launch App <ArrowRight className="w-4 h-4" />
             </Link>
