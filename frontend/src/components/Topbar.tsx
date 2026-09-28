@@ -1,11 +1,19 @@
 import React, { useState } from 'react';
 import { Search, ChevronDown, Bell, User } from 'lucide-react';
-import { LOCATIONS_DB, INDIA_REGIONS } from '../lib/locations';
+import { LOCATIONS_DB, INDIA_REGIONS, LocationRecord } from '../lib/locations';
+import { useNowcastStore } from '../store/useNowcastStore';
 
 export function Topbar() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [selectedRegion, setSelectedRegion] = useState('north');
+  const setMapCenter = useNowcastStore(state => state.setMapCenter);
+  
+  const handleLocationSelect = (loc: LocationRecord) => {
+    setSearchQuery(loc.name);
+    setIsSearchFocused(false);
+    setMapCenter([loc.lat, loc.lng], 10);
+  };
   
   const filteredLocations = searchQuery.length >= 2 
     ? LOCATIONS_DB.filter(loc => 
@@ -31,7 +39,7 @@ export function Topbar() {
           {isSearchFocused && filteredLocations.length > 0 && (
             <div className="absolute top-full left-0 right-0 mt-1 bg-nowcast-bg border border-nowcast-card rounded-md shadow-xl z-50 max-h-64 overflow-y-auto">
               {filteredLocations.map(loc => (
-                <div key={loc.id} className="px-4 py-2 hover:bg-nowcast-card cursor-pointer flex flex-col border-b border-nowcast-card/30 last:border-0">
+                <div key={loc.id} onMouseDown={() => handleLocationSelect(loc)} className="px-4 py-2 hover:bg-nowcast-card cursor-pointer flex flex-col border-b border-nowcast-card/30 last:border-0">
                   <span className="text-sm font-medium text-nowcast-text">{loc.name}</span>
                   <span className="text-xs text-nowcast-textMuted">{loc.state} • {loc.type}</span>
                 </div>
@@ -72,9 +80,9 @@ export function Topbar() {
           <span className="text-xs font-medium text-nowcast-success">Live</span>
         </div>
         
-        <button className="relative p-2 rounded-full hover:bg-nowcast-card transition-colors">
-          <Bell className="w-5 h-5 text-nowcast-textMuted" />
-          <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-nowcast-accent rounded-full border border-nowcast-bg"></span>
+        <button className="relative p-2 rounded-full hover:bg-nowcast-danger/10 transition-colors">
+          <Bell className="w-5 h-5 text-nowcast-danger" />
+          <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-nowcast-danger rounded-full border border-nowcast-bg animate-pulse"></span>
         </button>
         
         <div className="w-8 h-8 rounded-full bg-nowcast-accent/20 flex items-center justify-center border border-nowcast-accent/30 text-nowcast-accent font-medium text-sm">

@@ -1,5 +1,5 @@
 /** Risk levels for weather alerts, ordered by severity. */
-export type RiskLevel = 'low' | 'medium' | 'high' | 'critical';
+export type RiskLevel = 'minimal' | 'low' | 'moderate' | 'high' | 'severe' | 'extreme';
 
 /** A single weather warning alert with geolocation and risk classification. */
 export interface WeatherAlert {
@@ -30,44 +30,64 @@ export interface RiskLevelConfig {
 
 /** Map from risk level to its visual config. */
 export const RISK_LEVEL_CONFIG: Record<RiskLevel, RiskLevelConfig> = {
-  low: {
-    label: 'Low',
+  minimal: {
+    label: 'Minimal (0-15%)',
     color: '#00E676',
     fillColor: '#00E676',
-    fillOpacity: 0.15,
+    fillOpacity: 0.1,
     icon: '✓',
-    bgClass: 'bg-nowcast-riskLow/10',
-    textClass: 'text-nowcast-riskLow',
-    borderClass: 'border-nowcast-riskLow/30',
+    bgClass: 'bg-[#00E676]/10',
+    textClass: 'text-[#00E676]',
+    borderClass: 'border-[#00E676]/30',
   },
-  medium: {
-    label: 'Medium',
+  low: {
+    label: 'Low (15-30%)',
+    color: '#81C784',
+    fillColor: '#81C784',
+    fillOpacity: 0.15,
+    icon: '⚠',
+    bgClass: 'bg-[#81C784]/10',
+    textClass: 'text-[#81C784]',
+    borderClass: 'border-[#81C784]/30',
+  },
+  moderate: {
+    label: 'Moderate (30-50%)',
     color: '#FFAA00',
     fillColor: '#FFAA00',
     fillOpacity: 0.2,
     icon: '⚠',
-    bgClass: 'bg-nowcast-riskMedium/10',
-    textClass: 'text-nowcast-riskMedium',
-    borderClass: 'border-nowcast-riskMedium/30',
+    bgClass: 'bg-[#FFAA00]/10',
+    textClass: 'text-[#FFAA00]',
+    borderClass: 'border-[#FFAA00]/30',
   },
   high: {
-    label: 'High',
+    label: 'High (50-70%)',
     color: '#FF6D00',
     fillColor: '#FF6D00',
     fillOpacity: 0.3,
     icon: '⚡',
-    bgClass: 'bg-nowcast-riskHigh/10',
-    textClass: 'text-nowcast-riskHigh',
-    borderClass: 'border-nowcast-riskHigh/30',
+    bgClass: 'bg-[#FF6D00]/10',
+    textClass: 'text-[#FF6D00]',
+    borderClass: 'border-[#FF6D00]/30',
   },
-  critical: {
-    label: 'Critical',
+  severe: {
+    label: 'Severe (70-90%)',
     color: '#FF1744',
     fillColor: '#FF1744',
     fillOpacity: 0.4,
     icon: '🔴',
-    bgClass: 'bg-nowcast-riskCritical/10',
-    textClass: 'text-nowcast-riskCritical',
-    borderClass: 'border-nowcast-riskCritical/30',
+    bgClass: 'bg-[#FF1744]/10',
+    textClass: 'text-[#FF1744]',
+    borderClass: 'border-[#FF1744]/30',
+  },
+  extreme: {
+    label: 'Extreme (>90%)',
+    color: '#D50000',
+    fillColor: '#D50000',
+    fillOpacity: 0.5,
+    icon: '💀',
+    bgClass: 'bg-[#D50000]/10',
+    textClass: 'text-[#D50000]',
+    borderClass: 'border-[#D50000]/30',
   },
 };

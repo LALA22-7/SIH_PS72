@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { MapContainer, TileLayer, Circle, Popup, useMap } from 'react-leaflet';
-import { useNowcastStore } from '../../store/useNowcastStore';
+import { useNowcastStore, DEMO_ALERTS } from '../../store/useNowcastStore';
 import { getNowcast, getAlerts } from '../../lib/api';
 import {
   type WeatherAlert,
@@ -12,66 +12,6 @@ import { AlertTriangle, Shield, Zap, CloudLightning, X } from 'lucide-react';
 // India center
 const MAP_CENTER = [20.5937, 78.9629] as [number, number];
 const ZOOM = 5;
-
-/**
- * Demo alerts for development. In production these come from
- * the `/api/v1/alerts/active` endpoint and WebSocket pushes.
- */
-const DEMO_ALERTS: WeatherAlert[] = [
-  {
-    id: 'alert-001',
-    title: 'Severe Thunderstorm Warning',
-    description: 'Intense convective activity detected. Large hail and damaging winds expected.',
-    riskLevel: 'critical',
-    latitude: 26.8467,
-    longitude: 80.9462,
-    radius_km: 60,
-    issuedAt: new Date().toISOString(),
-    validUntil: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString(),
-    eventType: 'THUNDERSTORM',
-    probability: 0.92,
-  },
-  {
-    id: 'alert-002',
-    title: 'Lightning Activity — High Risk',
-    description: 'Cloud-to-ground lightning frequency exceeding 50 strokes/min within the zone.',
-    riskLevel: 'high',
-    latitude: 28.6139,
-    longitude: 77.209,
-    radius_km: 45,
-    issuedAt: new Date().toISOString(),
-    validUntil: new Date(Date.now() + 90 * 60 * 1000).toISOString(),
-    eventType: 'EXTREME_LIGHTNING',
-    probability: 0.78,
-  },
-  {
-    id: 'alert-003',
-    title: 'Thunderstorm Watch',
-    description: 'Atmospheric conditions favorable for isolated storm development.',
-    riskLevel: 'medium',
-    latitude: 22.5726,
-    longitude: 88.3639,
-    radius_km: 80,
-    issuedAt: new Date().toISOString(),
-    validUntil: new Date(Date.now() + 3 * 60 * 60 * 1000).toISOString(),
-    eventType: 'THUNDERSTORM',
-    probability: 0.55,
-  },
-  {
-    id: 'alert-004',
-    title: 'Low Risk Advisory',
-    description: 'Minor instability detected. No immediate threat but monitoring advised.',
-    riskLevel: 'low',
-    latitude: 18.5204,
-    longitude: 73.8567,
-    radius_km: 50,
-    issuedAt: new Date().toISOString(),
-    validUntil: new Date(Date.now() + 4 * 60 * 60 * 1000).toISOString(),
-    eventType: 'THUNDERSTORM',
-    probability: 0.25,
-  },
-];
-
 /** Resolve the icon component by event type. */
 function getEventIcon(eventType: string) {
   switch (eventType) {
@@ -98,15 +38,15 @@ function formatRelativeTime(iso: string): string {
 /** Fit the map to show all alert and cell markers. */
 function MapUpdater({ cells, alerts }: { cells: any[]; alerts: WeatherAlert[] }) {
   const map = useMap();
+  const { mapCenter, mapZoom, setMapCenter } = useNowcastStore();
+
   useEffect(() => {
-    const points: [number, number][] = [
-      ...cells.map((c: any) => [c.center.lat, c.center.lon] as [number, number]),
-      ...alerts.map((a) => [a.latitude, a.longitude] as [number, number]),
-    ];
-    if (points.length > 0) {
-      // Optionally auto-fit bounds
+    if (mapCenter) {
+      map.flyTo(mapCenter, mapZoom || 8, { duration: 1.5 });
+      // Reset after flying so we don't keep snapping on re-renders
+      setTimeout(() => setMapCenter(null), 1500);
     }
-  }, [cells, alerts, map]);
+  }, [mapCenter, mapZoom, map, setMapCenter]);
   return null;
 }
 
@@ -289,7 +229,7 @@ export function NowcastMap() {
           Risk Levels
         </div>
         <div className="flex flex-col gap-1.5">
-          {(['low', 'medium', 'high', 'critical'] as RiskLevel[]).map((level) => {
+          {(['extreme', 'severe', 'high', 'moderate', 'low', 'minimal'] as RiskLevel[]).map((level) => {
             const cfg = RISK_LEVEL_CONFIG[level];
             const count = visibleAlerts.filter((a) => a.riskLevel === level).length;
             return (
@@ -330,13 +270,17 @@ export function NowcastMap() {
 /** Maps backend severity strings to the 4-tier risk enum. */
 function mapSeverityToRisk(severity?: string): RiskLevel {
   switch (severity?.toUpperCase()) {
+    case 'EXTREME':
+      return 'extreme';
     case 'WARNING':
-      return 'critical';
+      return 'severe';
     case 'WATCH':
       return 'high';
     case 'ADVISORY':
-      return 'medium';
-    default:
+      return 'moderate';
+    case 'LOW':
       return 'low';
+    default:
+      return 'minimal';
   }
 }

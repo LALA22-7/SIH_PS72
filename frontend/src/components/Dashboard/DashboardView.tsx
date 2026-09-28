@@ -13,90 +13,109 @@ function formatRelativeTime(iso: string): string {
   return `${hours}h ${minutes % 60}m remaining`;
 }
 
+const STATS_DATA = [
+  {
+    title: 'Active Thunderstorm Cells',
+    value: '12',
+    trend: '↑ 3',
+    trendColor: 'text-nowcast-success',
+    caption: 'vs previous hour',
+    icon: Cloud,
+    iconColor: 'text-blue-400',
+  },
+  {
+    title: 'Lightning Events',
+    value: '2,184',
+    trend: '↑ 18%',
+    trendColor: 'text-nowcast-danger',
+    caption: 'last 1 hour',
+    icon: Zap,
+    iconColor: 'text-nowcast-accent',
+  },
+  {
+    title: 'High Risk Areas',
+    value: '5',
+    trend: null,
+    trendColor: '',
+    caption: '> 70% probability',
+    icon: AlertTriangle,
+    iconColor: 'text-nowcast-danger',
+  },
+  {
+    title: 'Coverage Area',
+    value: 'North India',
+    trend: null,
+    trendColor: '',
+    caption: '(Demo Region)',
+    icon: MapPin,
+    iconColor: 'text-blue-400',
+  },
+];
+
+const MAP_LAYERS = [
+  { id: 'thunderstorm', label: 'Thunderstorm Probability' },
+  { id: 'lightning', label: 'Lightning Probability' },
+  { id: 'composite', label: 'Composite View' },
+  { id: 'observations', label: 'Observations' },
+] as const;
+
 export function DashboardView() {
-  const { alerts } = useNowcastStore();
+  const { alerts, selectedLayer, setSelectedLayer } = useNowcastStore();
+  const [isFullScreen, setIsFullScreen] = React.useState(false);
   
   const sortedAlerts = useMemo(() => {
-    const order: Record<RiskLevel, number> = { critical: 0, high: 1, medium: 2, low: 3 };
+    const order: Record<RiskLevel, number> = { extreme: 0, severe: 1, high: 2, moderate: 3, low: 4, minimal: 5 };
     return [...alerts].sort((a, b) => order[a.riskLevel] - order[b.riskLevel]);
   }, [alerts]);
 
   return (
-    <div className="flex flex-col h-full gap-4 p-4 overflow-y-auto">
+    <div className="flex flex-col h-full gap-3 p-4 overflow-y-auto">
       {/* Top Stats Cards */}
-      <div className="grid grid-cols-4 gap-4 shrink-0">
-        <div className="bg-nowcast-sidebar border border-nowcast-card rounded-xl p-4 flex flex-col justify-between">
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-2">
-              <Cloud className="w-4 h-4 text-blue-400" />
-              <span className="text-xs text-nowcast-textMuted font-medium uppercase tracking-wider">Active Thunderstorm Cells</span>
+      <div className="grid grid-cols-4 gap-2 shrink-0">
+        {STATS_DATA.map((stat) => (
+          <div key={stat.title} className="bg-nowcast-sidebar border border-nowcast-card rounded-xl p-2 flex flex-col justify-between">
+            <div className="flex items-center justify-between mb-1">
+              <div className="flex items-center gap-1.5">
+                <stat.icon className={`w-3.5 h-3.5 ${stat.iconColor}`} />
+                <span className="text-[9px] text-nowcast-textMuted font-bold uppercase tracking-wider">{stat.title}</span>
+              </div>
             </div>
-          </div>
-          <div className="flex items-baseline gap-3">
-            <span className="text-3xl font-bold">12</span>
-            <span className="text-sm font-medium text-nowcast-success flex items-center">↑ 3</span>
-          </div>
-          <span className="text-xs text-nowcast-textMuted mt-1">vs previous hour</span>
-        </div>
-
-        <div className="bg-nowcast-sidebar border border-nowcast-card rounded-xl p-4 flex flex-col justify-between">
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-2">
-              <Zap className="w-4 h-4 text-nowcast-accent" />
-              <span className="text-xs text-nowcast-textMuted font-medium uppercase tracking-wider">Lightning Events</span>
+            <div className="flex items-baseline gap-2">
+              <span className={`font-bold ${stat.trend === null && isNaN(Number(stat.value)) ? 'text-base' : 'text-xl'}`}>{stat.value}</span>
+              {stat.trend && (
+                <span className={`text-xs font-medium flex items-center ${stat.trendColor}`}>{stat.trend}</span>
+              )}
             </div>
+            <span className="text-[10px] text-nowcast-textMuted mt-0.5">{stat.caption}</span>
           </div>
-          <div className="flex items-baseline gap-3">
-            <span className="text-3xl font-bold">2,184</span>
-            <span className="text-sm font-medium text-nowcast-danger flex items-center">↑ 18%</span>
-          </div>
-          <span className="text-xs text-nowcast-textMuted mt-1">last 1 hour</span>
-        </div>
-
-        <div className="bg-nowcast-sidebar border border-nowcast-card rounded-xl p-4 flex flex-col justify-between">
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-2">
-              <AlertTriangle className="w-4 h-4 text-nowcast-danger" />
-              <span className="text-xs text-nowcast-textMuted font-medium uppercase tracking-wider">High Risk Areas</span>
-            </div>
-          </div>
-          <div className="flex items-baseline gap-3">
-            <span className="text-3xl font-bold">5</span>
-          </div>
-          <span className="text-xs text-nowcast-textMuted mt-1">&gt; 70% probability</span>
-        </div>
-
-        <div className="bg-nowcast-sidebar border border-nowcast-card rounded-xl p-4 flex flex-col justify-between">
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-2">
-              <MapPin className="w-4 h-4 text-blue-400" />
-              <span className="text-xs text-nowcast-textMuted font-medium uppercase tracking-wider">Coverage Area</span>
-            </div>
-          </div>
-          <div className="flex items-baseline gap-3">
-            <span className="text-xl font-bold">North India</span>
-          </div>
-          <span className="text-xs text-nowcast-textMuted mt-1">(Demo Region)</span>
-        </div>
+        ))}
       </div>
 
       {/* Main Content Area */}
-      <div className="flex gap-4 flex-1 min-h-[500px]">
+      <div className={`flex gap-4 flex-1 min-h-[500px] ${isFullScreen ? 'fixed inset-0 z-[5000] bg-nowcast-bg p-4' : ''}`}>
         {/* Map Section */}
         <div className="flex-1 bg-nowcast-sidebar border border-nowcast-card rounded-xl overflow-hidden relative flex flex-col">
           {/* Map Tabs */}
           <div className="flex items-center gap-2 p-3 bg-nowcast-sidebar border-b border-nowcast-card shrink-0 z-10 relative">
-            <button className="px-4 py-1.5 rounded-md text-sm font-medium bg-nowcast-accent/10 text-nowcast-accent border border-nowcast-accent/20 transition-colors">
-              Thunderstorm Probability
-            </button>
-            <button className="px-4 py-1.5 rounded-md text-sm font-medium text-nowcast-textMuted hover:bg-nowcast-card transition-colors border border-transparent">
-              Lightning Probability
-            </button>
-            <button className="px-4 py-1.5 rounded-md text-sm font-medium text-nowcast-textMuted hover:bg-nowcast-card transition-colors border border-transparent">
-              Composite View
-            </button>
-            <button className="px-4 py-1.5 rounded-md text-sm font-medium text-nowcast-textMuted hover:bg-nowcast-card transition-colors border border-transparent">
-              Observations
+            {MAP_LAYERS.map((layer) => (
+              <button
+                key={layer.id}
+                onClick={() => setSelectedLayer(layer.id)}
+                className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors border ${
+                  selectedLayer === layer.id
+                    ? 'bg-nowcast-accent/10 text-nowcast-accent border-nowcast-accent/20'
+                    : 'text-nowcast-textMuted hover:bg-nowcast-card border-transparent'
+                }`}
+              >
+                {layer.label}
+              </button>
+            ))}
+            <div className="flex-1" />
+            <button 
+              onClick={() => setIsFullScreen(!isFullScreen)}
+              className="px-3 py-1.5 rounded-md text-sm font-medium text-nowcast-textMuted hover:bg-nowcast-card border border-nowcast-card transition-colors flex items-center gap-2"
+            >
+              {isFullScreen ? 'Exit Full Screen' : 'Full Screen'}
             </button>
           </div>
           
