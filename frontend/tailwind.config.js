@@ -8,11 +8,11 @@ export default {
     extend: {
       colors: {
         nowcast: {
-          bg: '#0a0d14',
-          sidebar: '#111520',
-          card: '#161b28',
-          accent: '#f59e0b',
-          accentHover: '#fbbf24',
+          bg: '#050505',
+          sidebar: '#0a0a0a',
+          card: '#111111',
+          accent: '#ccff00',
+          accentHover: '#b3e600',
           text: '#f8fafc',
           textMuted: '#94a3b8',
           danger: '#ef4444',

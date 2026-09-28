@@ -10,7 +10,7 @@
 
 /* Custom Leaflet Dark Mode Tweaks */
 .leaflet-container {
-  @apply bg-[#0a0d14] font-sans;
+  @apply bg-[#050505] font-sans;
 }
 
 .map-tiles {
