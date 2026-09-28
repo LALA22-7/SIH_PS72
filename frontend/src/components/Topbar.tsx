@@ -8,6 +8,9 @@ export function Topbar() {
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [selectedRegion, setSelectedRegion] = useState('north');
   const setMapCenter = useNowcastStore(state => state.setMapCenter);
+  const alerts = useNowcastStore(state => state.alerts);
+  
+  const hasHighRiskAlerts = alerts.some(alert => ['high', 'severe', 'extreme'].includes(alert.riskLevel));
   
   const handleLocationSelect = (loc: LocationRecord) => {
     setSearchQuery(loc.name);
@@ -80,9 +83,9 @@ export function Topbar() {
           <span className="text-xs font-medium text-nowcast-success">Live</span>
         </div>
         
-        <button className="relative p-2 rounded-full hover:bg-nowcast-danger/10 transition-colors">
-          <Bell className="w-5 h-5 text-nowcast-danger" />
-          <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-nowcast-danger rounded-full border border-nowcast-bg animate-pulse"></span>
+        <button className="relative p-2 rounded-full hover:bg-nowcast-card transition-colors">
+          <Bell className="w-5 h-5 text-nowcast-textMuted" />
+          <span className={`absolute top-1.5 right-1.5 w-2 h-2 rounded-full border border-nowcast-bg ${hasHighRiskAlerts ? 'bg-nowcast-danger animate-pulse' : 'bg-nowcast-success'}`}></span>
         </button>
         
         <div className="w-8 h-8 rounded-full bg-nowcast-accent/20 flex items-center justify-center border border-nowcast-accent/30 text-nowcast-accent font-medium text-sm">
