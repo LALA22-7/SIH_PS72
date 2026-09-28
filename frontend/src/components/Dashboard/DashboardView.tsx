@@ -21,6 +21,7 @@ export function DashboardView() {
     return [...alerts].sort((a, b) => order[a.riskLevel] - order[b.riskLevel]);
   }, [alerts]);
 
+  return (
     <div className="flex flex-col h-full gap-4 p-4 overflow-y-auto">
       {/* Top Stats Cards */}
       <div className="grid grid-cols-4 gap-4 shrink-0">
