@@ -6,7 +6,7 @@ import { useNowcastStore } from '../store/useNowcastStore';
 export function Topbar() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchFocused, setIsSearchFocused] = useState(false);
-  const [selectedRegion, setSelectedRegion] = useState('north');
+  const [selectedRegion, setSelectedRegion] = useState('all');
   const setMapCenter = useNowcastStore(state => state.setMapCenter);
   const alerts = useNowcastStore(state => state.alerts);
   
